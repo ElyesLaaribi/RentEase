@@ -1,4 +1,5 @@
 import axios from "axios";
+import router from "./router.js";
 
 axios.defaults.withCredentials = true;
 
@@ -23,7 +24,13 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      router.push({ name: "Login" });
+      // Only redirect to login if the user had a token (expired session)
+      // Don't redirect guests who are browsing public pages
+      const token = localStorage.getItem("auth_token");
+      if (token) {
+        localStorage.removeItem("auth_token");
+        router.push({ name: "Login" });
+      }
     }
     return Promise.reject(error);
   }

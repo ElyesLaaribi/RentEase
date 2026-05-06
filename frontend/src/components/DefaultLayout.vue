@@ -9,7 +9,7 @@ import { Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/vue";
 import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/vue";
 import api from "../axios.js";
 import router from "../router.js";
-import { ref, watch, onMounted, computed, onUnmounted } from "vue";
+import { ref, onMounted, computed, onUnmounted } from "vue";
 import { useUserStore } from "../store/user.js";
 import { useFirebaseMessaging } from "../composables/useFirebaseMessaging";
 
@@ -96,23 +96,22 @@ const formatTime = (timestamp) => {
 
 const userStore = useUserStore();
 const user = computed(() => userStore.user);
+const isAuthenticated = computed(() => !!userStore.token);
 
-const navigation = ref([
-  { name: "Browse", href: "/home", current: true },
-  { name: "My Rentals", href: "/my-rentals", current: false },
-]);
+const navigation = computed(() => {
+  const items = [
+    { name: "Home", href: "/" },
+    { name: "Browse", href: "/home" },
+  ];
+  // Only show "My Rentals" for authenticated users
+  if (isAuthenticated.value) {
+    items.push({ name: "My Rentals", href: "/my-rentals" });
+  }
+  return items;
+});
 
-// Watch for route changes to update current state
-watch(
-  () => router.currentRoute.value.path,
-  (newPath) => {
-    navigation.value = navigation.value.map((item) => ({
-      ...item,
-      current: newPath === item.href,
-    }));
-  },
-  { immediate: true }
-);
+// Current route path for highlighting active nav items
+const currentPath = computed(() => router.currentRoute.value.path);
 
 function logout() {
   api
@@ -176,12 +175,12 @@ function logout() {
                 :key="item.name"
                 :to="item.href"
                 :class="[
-                  item.current
+                  currentPath === item.href
                     ? 'bg-[#036F8B] text-white hover:bg-[#036F8B]'
                     : 'text-gray-300 hover:bg-[#036F8B] hover:text-white',
                   'px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200',
                 ]"
-                :aria-current="item.current ? 'page' : undefined"
+                :aria-current="currentPath === item.href ? 'page' : undefined"
               >
                 {{ item.name }}
               </router-link>
@@ -416,12 +415,12 @@ function logout() {
             as="a"
             :href="item.href"
             :class="[
-              item.current
+              currentPath === item.href
                 ? 'bg-[#036F8B] text-white hover:bg-[#036F8B]'
                 : 'text-gray-300 hover:bg-[#036F8B] hover:text-white',
               'block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200',
             ]"
-            :aria-current="item.current ? 'page' : undefined"
+            :aria-current="currentPath === item.href ? 'page' : undefined"
           >
             {{ item.name }}
           </DisclosureButton>

@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed } from "vue";
 import router from "../../router.js";
+import { useRoute } from "vue-router";
 import api from "../../axios.js";
 import { useUserStore } from "../../store/user";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/vue/24/outline";
@@ -8,6 +9,7 @@ import { useToast } from "vue-toast-notification";
 import "vue-toast-notification/dist/theme-sugar.css";
 import { $t } from "@primeuix/themes";
 const $toast = useToast();
+const route = useRoute();
 
 const data = ref({
   email: "",
@@ -48,12 +50,19 @@ async function submit() {
     api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
     useUserStore().setToken(token);
 
-    const redirectRoute =
-      response.data.user.role === "client"
-        ? { name: "Home" }
-        : { name: "LessorHome" };
-    $toast.success("Login successful!");
-    router.push(redirectRoute);
+    // Check if there's a redirect URL (e.g. guest tried to reserve before login)
+    const redirectPath = route.query.redirect;
+    if (redirectPath && response.data.user.role === "client") {
+      $toast.success("Login successful!");
+      router.push(redirectPath);
+    } else {
+      const redirectRoute =
+        response.data.user.role === "client"
+          ? { name: "Home" }
+          : { name: "LessorHome" };
+      $toast.success("Login successful!");
+      router.push(redirectRoute);
+    }
   } catch (error) {
     if (error.response) {
       if (error.response.status === 422) {

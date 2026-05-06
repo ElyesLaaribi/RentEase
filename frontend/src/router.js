@@ -43,6 +43,26 @@ const clientGuard = async (to, from, next) => {
     }
 };
 
+// Guard that requires authentication — redirects guests to login with a return URL
+const authRequiredGuard = async (to, from, next) => {
+    const userStore = useUserStore();
+
+    if (!userStore.token) {
+        next({ name: 'Login', query: { redirect: to.fullPath } });
+        return;
+    }
+
+    if (!userStore.user) {
+        await userStore.fetchUser();
+    }
+
+    if (userStore.user?.role === "client") {
+        next();
+    } else {
+        next("/notFound");
+    }
+};
+
 
 const lessorGuard = async (to, from, next) => {
     const lessorStore = useLessorStore();
@@ -84,10 +104,10 @@ const routes = [
     { path: "/reset-password", name: "ResetPassword", component: ResetPassword },
 
     // client
-    { path: "/home", name: "Home", component: Home, beforeEnter: clientGuard },
+    { path: "/home", name: "Home", component: Home },
     { path: "/client-profile", name: "client-profile", component: ClientProfile , beforeEnter: clientGuard },
-    { path: "/product-overview/:id", name: "product", component: ProductOverview , beforeEnter: clientGuard },
-    { path: "/checkout/:id", name: "checkout", component: Checkout , beforeEnter: clientGuard },
+    { path: "/product-overview/:id", name: "product", component: ProductOverview },
+    { path: "/checkout/:id", name: "checkout", component: Checkout , beforeEnter: authRequiredGuard },
     { path: "/my-rentals", name: "my-reservatgions", component: MyRentals , beforeEnter: clientGuard },
 
     // lessor

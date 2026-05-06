@@ -267,6 +267,12 @@ const navigateToDashboard = () => {
                   >
                     Get started
                   </router-link>
+                  <router-link
+                    :to="{ name: 'Home' }"
+                    class="rounded-md px-5 py-3 text-base font-semibold shadow-sm transition-colors duration-300 border-2 border-[#135CA5] text-[#135CA5] hover:bg-[#135CA5] hover:text-white"
+                  >
+                    Browse Products
+                  </router-link>
                 </template>
                 <template v-else>
                   <button

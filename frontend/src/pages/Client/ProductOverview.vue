@@ -476,9 +476,35 @@ const submitReview = async () => {
   }
 };
 
+const isAuthenticated = computed(() => !!userStore.token);
+
 const handleReserveClick = () => {
   const image0 =
     listingData.value.images[0]?.src || "/images/fallback-image.jpg";
+
+  // If user is not logged in, redirect to login with a return URL to checkout
+  if (!isAuthenticated.value) {
+    const checkoutPath = router.resolve({
+      name: "checkout",
+      params: { id: listingData.value.id },
+      query: {
+        image: image0,
+        startDate: rentalStart.value,
+        endDate: rentalEnd.value,
+        days: totalDays.value,
+        price: listingData.value.price,
+        totalPrice: total.value,
+        service: serviceFee,
+      },
+    }).fullPath;
+
+    router.push({
+      name: "Login",
+      query: { redirect: checkoutPath },
+    });
+    return;
+  }
+
   console.log("Reservation requested for listing:", listingData.value.id);
   console.log("Rental period:", rentalStart.value, "to", rentalEnd.value);
   console.log("Total days:", totalDays.value);
