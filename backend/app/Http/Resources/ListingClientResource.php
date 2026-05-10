@@ -14,13 +14,13 @@ class ListingClientResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return[
+        return [
             'id' => $this->id,
             'name' => $this->name,
             'price' => $this->price,
             'description' => $this->description,
             'images' => collect($this->images ?? [])->map(function ($image) {
-                return $image ? asset('storage/' . $image) : null;
+                return $image ? (str_starts_with($image, 'http') ? $image : asset('storage/' . $image)) : null;
             })->filter(),
             'category_id' => $this->category_id,
             'cat_title' => optional($this->category)->cat_title,

@@ -54,10 +54,12 @@ class ListingsController extends Controller
     {
         $data = $request->validated();
         $existingImages = $listing->images ?? [];
-        
+
         if ($request->has('deleted_images')) {
             $deletedImages = array_map(function ($imageUrl) {
-                return str_replace(asset('storage/') . '/', '', $imageUrl);
+                // Remove the base URL to get just the path
+                $baseUrl = asset('/');
+                return str_replace($baseUrl, '', $imageUrl);
             }, $request->input('deleted_images'));
 
             foreach ($deletedImages as $imagePath) {

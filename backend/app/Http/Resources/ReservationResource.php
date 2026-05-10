@@ -25,7 +25,7 @@ class ReservationResource extends JsonResource
             'start_date' => $this->start_date,
             'end_date' => $this->end_date,
             'images' => collect($this->listing->images ?? [])->map(function ($image) {
-                return $image ? asset('storage/' . $image) : null;
+                return $image ? (str_starts_with($image, 'http') ? $image : asset('storage/' . $image)) : null;
             })->filter()->first(),
             'price' => $this->price,
         ];
