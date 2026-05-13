@@ -4,6 +4,7 @@ import router from "../../router.js";
 import { useRoute } from "vue-router";
 import api from "../../axios.js";
 import { useUserStore } from "../../store/user";
+import useLessorStore from "../../store/lessor";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/vue/24/outline";
 import { useToast } from "vue-toast-notification";
 import "vue-toast-notification/dist/theme-sugar.css";
@@ -44,9 +45,18 @@ async function submit() {
     const response = await api.post("/api/login", data.value);
     const token = response.data.token;
     const userStore = useUserStore();
+    const lessorStore = useLessorStore();
 
     userStore.setToken(token, data.value.rememberMe);
-    userStore.setUser(response.data.user);
+    lessorStore.setToken(token, data.value.rememberMe);
+
+    if (response.data.user.role === "lessor") {
+      userStore.setUser(null);
+      lessorStore.setLessor(response.data.user);
+    } else {
+      userStore.setUser(response.data.user);
+      lessorStore.setLessor(null);
+    }
 
     // Check if there's a redirect URL (e.g. guest tried to reserve before login)
     const redirectPath = route.query.redirect;

@@ -1,0 +1,118 @@
+@startuml
+title RentEase - Diagramme de cas d'utilisation corrige
+
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+actor "Visiteur" as Visiteur
+actor "Client" as Client
+actor "Loueur" as Loueur
+actor "Admin" as Admin
+actor "Planificateur Laravel" as Scheduler <<system>>
+actor "Firebase Cloud Messaging" as FCM <<external>>
+actor "Service SMTP" as SMTP <<external>>
+
+rectangle "Marketplace de location de biens entre particuliers" {
+  usecase "Creer un compte client" as UC_CreerClient
+  usecase "Creer un compte loueur" as UC_CreerLoueur
+  usecase "S'authentifier" as UC_Login
+  usecase "Se deconnecter" as UC_Logout
+  usecase "Demander un code de\nreinitialisation" as UC_Forgot
+  usecase "Reinitialiser le mot de passe" as UC_Reset
+
+  usecase "Rechercher un bien" as UC_Search
+  usecase "Filtrer les biens" as UC_Filter
+  usecase "Consulter le detail\nd'un bien" as UC_Detail
+  usecase "Consulter les dates\nreservees" as UC_Dates
+
+  usecase "Gerer le profil" as UC_Profile
+  usecase "Changer le mot de passe" as UC_ChangePassword
+  usecase "Reserver un bien" as UC_Reserve
+  usecase "Consulter mes reservations" as UC_ClientReservations
+  usecase "Creer ou gerer un avis" as UC_Reviews
+  usecase "Recevoir des notifications" as UC_ReceiveNotifications
+  usecase "Enregistrer le jeton appareil" as UC_DeviceToken
+
+  usecase "Gerer les annonces" as UC_Listings
+  usecase "Consulter les reservations\ndes annonces" as UC_LessorReservations
+  usecase "Consulter dashboard loueur" as UC_LessorDashboard
+
+  usecase "S'authentifier comme admin" as UC_AdminLogin
+  usecase "Se deconnecter comme admin" as UC_AdminLogout
+  usecase "Gerer les utilisateurs" as UC_Users
+  usecase "Gerer les administrateurs" as UC_Admins
+  usecase "Gerer les categories" as UC_Categories
+  usecase "Consulter dashboard admin" as UC_AdminDashboard
+
+  usecase "Envoyer les rappels\nde location" as UC_SendReminders
+}
+
+Visiteur --> UC_CreerClient
+Visiteur --> UC_CreerLoueur
+Visiteur --> UC_Login
+Visiteur --> UC_Forgot
+Visiteur --> UC_Reset
+Visiteur --> UC_Search
+Visiteur --> UC_Filter
+Visiteur --> UC_Detail
+Visiteur --> UC_Dates
+
+Client --> UC_Login
+Client --> UC_Logout
+Client --> UC_Search
+Client --> UC_Filter
+Client --> UC_Detail
+Client --> UC_Dates
+Client --> UC_Profile
+Client --> UC_ChangePassword
+Client --> UC_Reserve
+Client --> UC_ClientReservations
+Client --> UC_Reviews
+Client --> UC_DeviceToken
+Client --> UC_ReceiveNotifications
+
+Loueur --> UC_Login
+Loueur --> UC_Logout
+Loueur --> UC_Profile
+Loueur --> UC_ChangePassword
+Loueur --> UC_Listings
+Loueur --> UC_LessorReservations
+Loueur --> UC_LessorDashboard
+
+Admin --> UC_AdminLogin
+Admin --> UC_AdminLogout
+Admin --> UC_Users
+Admin --> UC_Admins
+Admin --> UC_Categories
+Admin --> UC_AdminDashboard
+
+UC_Filter ..> UC_Search : <<extend>>
+UC_Detail ..> UC_Search : <<extend>>
+UC_Reserve ..> UC_Login : <<include>>
+UC_ClientReservations ..> UC_Login : <<include>>
+UC_Profile ..> UC_Login : <<include>>
+UC_ChangePassword ..> UC_Login : <<include>>
+UC_Reviews ..> UC_Login : <<include>>
+UC_DeviceToken ..> UC_Login : <<include>>
+UC_Listings ..> UC_Login : <<include>>
+UC_LessorReservations ..> UC_Login : <<include>>
+UC_LessorDashboard ..> UC_Login : <<include>>
+
+UC_Forgot --> SMTP : envoie le code
+Scheduler --> UC_SendReminders
+UC_SendReminders --> FCM : push notification
+FCM --> UC_ReceiveNotifications
+
+note right of UC_Listings
+  Dans le projet, les annonces sont gerees
+  par les routes /api/listings protegees par Sanctum.
+end note
+
+note bottom of UC_Search
+  Le cas "envoyer un message" du diagramme initial
+  n'est pas retenu: la page DMs est un placeholder
+  et il n'existe pas de route, modele ou controleur Message.
+end note
+
+@enduml

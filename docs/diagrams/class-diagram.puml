@@ -1,0 +1,312 @@
+@startuml
+title RentEase - Diagramme de classes corrige
+
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+hide circle
+
+package "Modeles metier" {
+  enum RoleUtilisateur {
+    client
+    lessor
+  }
+
+  class User <<Eloquent Model>> {
+    +id: bigint
+    +name: string
+    +email: string
+    +email_verified_at: timestamp?
+    +password: string
+    +role: RoleUtilisateur
+    +country: string
+    +city: string
+    +cin: string
+    +phone: string
+    +device_token: string?
+    +remember_token: string?
+    +created_at: timestamp
+    +updated_at: timestamp
+    +listings()
+    +reviews()
+    +reservations()
+  }
+
+  class Admin <<Eloquent Model>> {
+    +id: bigint
+    +name: string
+    +email: string
+    +password: string
+    +role: string = "admin"
+    +remember_token: string?
+    +created_at: timestamp
+    +updated_at: timestamp
+  }
+
+  class Category <<Eloquent Model>> {
+    +id: bigint
+    +cat_title: string
+    +created_at: timestamp
+    +updated_at: timestamp
+    +listings()
+  }
+
+  class Listing <<Eloquent Model>> {
+    +id: bigint
+    +name: string
+    +price: float
+    +description: text?
+    +images: json/text?
+    +category_id: bigint
+    +user_id: bigint
+    +status: boolean
+    +address: string?
+    +latitude: decimal?
+    +longitude: decimal?
+    +created_at: timestamp
+    +updated_at: timestamp
+    +setImagesAttribute(value)
+    +getImagesAttribute(value)
+    +category()
+    +user()
+    +reviews()
+    +reservations()
+  }
+
+  class Reservation <<Eloquent Model>> {
+    +id: bigint
+    +listing_id: bigint
+    +user_id: bigint
+    +start_date: date
+    +end_date: date
+    +status: string = "pending"
+    +price: decimal
+    +reminder_sent: boolean
+    +reminder_sent_at: timestamp?
+    +created_at: timestamp
+    +updated_at: timestamp
+    +listing()
+    +user()
+  }
+
+  class Review <<Eloquent Model>> {
+    +id: bigint
+    +user_id: bigint
+    +listing_id: bigint
+    +comment: text
+    +created_at: timestamp
+    +updated_at: timestamp
+    +user()
+    +listing()
+  }
+
+  class PasswordReset <<Eloquent Model>> {
+    +id: bigint
+    +email: string
+    +token: string
+    +created_at: timestamp?
+  }
+
+  class PersonalAccessToken <<Sanctum>> {
+    +id: bigint
+    +tokenable_type: string
+    +tokenable_id: bigint
+    +name: string
+    +token: string
+    +abilities: text?
+    +last_used_at: timestamp?
+    +expires_at: timestamp?
+    +created_at: timestamp
+    +updated_at: timestamp
+  }
+}
+
+package "Controleurs principaux" {
+  class LoginController <<Controller>> {
+    +__invoke(request)
+  }
+
+  class RegisterController <<Controller>> {
+    +__invoke(request)
+  }
+
+  class LogoutController <<Controller>> {
+    +__invoke(request)
+  }
+
+  class ResetPassController <<Controller>> {
+    +forgot(hasher, request)
+    +reset(request)
+  }
+
+  class ProfileController <<Controller>> {
+    +profile(request)
+    +changePassword(request)
+    +updateProfile(request)
+  }
+
+  class ListingsController <<Controller>> {
+    +index()
+    +store(request)
+    +show(listing)
+    +update(request, listing)
+    +destroy(listing)
+  }
+
+  class RetrieveListingsController <<Controller>> {
+    +index(request)
+    +show(listing)
+    +getCategoryProducts(category)
+  }
+
+  class ReservationController <<Controller>> {
+    +index()
+    +store(request)
+    +show(reservation)
+  }
+
+  class ReviewController <<Controller>> {
+    +index(request)
+    +store(request)
+    +show(review)
+    +update(request, review)
+    +destroy(review)
+  }
+
+  class CategoryController <<Controller>> {
+    +index()
+    +store(request)
+    +show(category)
+    +update(request, category)
+    +destroy(category)
+  }
+
+  class UsersController <<Controller>> {
+    +index()
+    +show(user)
+    +destroy(user)
+  }
+
+  class AdminController <<Controller>> {
+    +index()
+    +show(admin)
+    +destroy(admin)
+  }
+
+  class AdminAddController <<Controller>> {
+    +__invoke(request)
+  }
+
+  class AdminLoginController <<Controller>> {
+    +__invoke(request)
+  }
+
+  class AdminLogoutController <<Controller>> {
+    +__invoke(request)
+  }
+
+  class ListingBI <<Controller>> {
+    +countListings()
+    +countReservations()
+    +getEarnings()
+    +getRevenuePerListing()
+    +getTotalClients()
+    +getAverageRevenue()
+    +getOccupancy()
+    +getPopularItems()
+    +getTopClients()
+  }
+
+  class AdminBIController <<Controller>> {
+    +getTotalClients()
+    +getTotalLessors()
+    +getTotalCategories()
+    +getTopLessors()
+    +getCategories()
+  }
+
+  class DeviceTokenController <<Controller>> {
+    +updateDeviceToken(request)
+  }
+
+  class NotificationController <<Controller>> {
+    +sendTest(request)
+    +testDirectFCM(request)
+  }
+}
+
+package "Services" {
+  class FirebaseNotificationService <<Service>> {
+    -messaging
+    +sendNotification(token, title, body, data)
+    +sendMulticastNotification(tokens, title, body, data)
+  }
+
+  class SendRentalReminders <<Console Command>> {
+    +handle(firebaseService)
+  }
+
+  class SendReservationNotification <<Queued Job>> {
+    +handle(firebaseService)
+  }
+}
+
+User --> RoleUtilisateur : role
+User "1" -- "0..*" Listing : possede
+User "1" -- "0..*" Reservation : reserve
+User "1" -- "0..*" Review : redige
+Category "1" -- "0..*" Listing : classe
+Listing "1" -- "0..*" Reservation : concerne
+Listing "1" -- "0..*" Review : recoit
+User "1" -- "0..*" PersonalAccessToken : jetons API
+Admin "1" -- "0..*" PersonalAccessToken : jetons admin
+PasswordReset "0..1" --> "1" User : email
+
+LoginController ..> User
+RegisterController ..> User
+LogoutController ..> PersonalAccessToken
+ResetPassController ..> User
+ResetPassController ..> PasswordReset
+ProfileController ..> User
+ListingsController ..> Listing
+RetrieveListingsController ..> Listing
+ReservationController ..> Reservation
+ReservationController ..> Listing
+ReviewController ..> Review
+CategoryController ..> Category
+UsersController ..> User
+AdminController ..> Admin
+AdminAddController ..> Admin
+AdminLoginController ..> Admin
+AdminLogoutController ..> PersonalAccessToken
+ListingBI ..> Listing
+ListingBI ..> Reservation
+AdminBIController ..> User
+AdminBIController ..> Category
+DeviceTokenController ..> User
+NotificationController ..> FirebaseNotificationService
+SendRentalReminders ..> Reservation
+SendRentalReminders ..> FirebaseNotificationService
+SendReservationNotification ..> FirebaseNotificationService
+
+note right of User
+  Correction du diagramme initial:
+  Client et Loueur ne sont pas des classes.
+  Ce sont des valeurs de User.role: client ou lessor.
+end note
+
+note bottom of RoleUtilisateur
+  Il n'y a pas de table Role dans le projet.
+  Le role est une colonne string dans users.
+end note
+
+note right of Review
+  Le modele Review existe dans le projet.
+  Il contient user_id, listing_id et comment.
+end note
+
+note bottom of Admin
+  Admin est un modele separe avec son guard Laravel.
+  Il n'a pas de relation directe en base avec Category.
+end note
+
+@enduml

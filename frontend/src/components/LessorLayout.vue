@@ -13,6 +13,10 @@ onMounted(() => {
   const savedState = localStorage.getItem("sidebar_expanded");
   isExpanded.value = savedState === null ? true : savedState === "true";
 
+  if (lessorStore.token && !lessorStore.lessor) {
+    lessorStore.fetchLessor();
+  }
+
   document.addEventListener("click", (e) => {
     const dropdownElement = document.getElementById("user-dropdown");
     const avatarElement = document.getElementById("user-avatar");
@@ -40,9 +44,7 @@ const toggleDropdown = (event) => {
 async function logout() {
   try {
     await api.post("/api/logout");
-    lessorStore.lessor = null;
-    localStorage.removeItem("auth_token");
-    delete api.defaults.headers.common["Authorization"];
+    lessorStore.clearToken();
     await router.push({ name: "Login" });
     window.location.reload();
   } catch (error) {
