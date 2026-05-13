@@ -3,6 +3,9 @@ import router from "./router.js";
 
 axios.defaults.withCredentials = true;
 
+const getStoredToken = () =>
+  localStorage.getItem("auth_token") || sessionStorage.getItem("auth_token");
+
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
   headers: {
@@ -13,7 +16,7 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("auth_token");
+  const token = getStoredToken();
   if (token) {
     config.headers["Authorization"] = `Bearer ${token}`;
   }
@@ -26,9 +29,10 @@ api.interceptors.response.use(
     if (error.response && error.response.status === 401) {
       // Only redirect to login if the user had a token (expired session)
       // Don't redirect guests who are browsing public pages
-      const token = localStorage.getItem("auth_token");
+      const token = getStoredToken();
       if (token) {
         localStorage.removeItem("auth_token");
+        sessionStorage.removeItem("auth_token");
         router.push({ name: "Login" });
       }
     }

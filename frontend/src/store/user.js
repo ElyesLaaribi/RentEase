@@ -4,7 +4,7 @@ import api from "../axios.js";
 export const useUserStore = defineStore('user', {
   state: () => ({
     user: null,
-    token: localStorage.getItem('auth_token') || null,
+    token: localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token') || null,
     loading: false,
   }),
 
@@ -28,15 +28,27 @@ export const useUserStore = defineStore('user', {
       }
     },
 
-    setToken(token) {
+    setToken(token, rememberMe = true) {
       this.token = token;
-      localStorage.setItem('auth_token', token);
+      if (rememberMe) {
+        localStorage.setItem('auth_token', token);
+        sessionStorage.removeItem('auth_token');
+      } else {
+        sessionStorage.setItem('auth_token', token);
+        localStorage.removeItem('auth_token');
+      }
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    },
+
+    setUser(user) {
+      this.user = user;
     },
 
     clearToken() {
       this.token = null;
+      this.user = null;
       localStorage.removeItem('auth_token');
+      sessionStorage.removeItem('auth_token');
       api.defaults.headers.common['Authorization'] = '';
     },
   },

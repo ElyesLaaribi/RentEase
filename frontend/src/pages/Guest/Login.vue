@@ -43,12 +43,10 @@ async function submit() {
     await api.get("/sanctum/csrf-cookie");
     const response = await api.post("/api/login", data.value);
     const token = response.data.token;
+    const userStore = useUserStore();
 
-    const storage = data.value.rememberMe ? localStorage : sessionStorage;
-    storage.setItem("auth_token", token);
-
-    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-    useUserStore().setToken(token);
+    userStore.setToken(token, data.value.rememberMe);
+    userStore.setUser(response.data.user);
 
     // Check if there's a redirect URL (e.g. guest tried to reserve before login)
     const redirectPath = route.query.redirect;

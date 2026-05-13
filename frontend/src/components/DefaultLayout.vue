@@ -29,6 +29,10 @@ onMounted(async () => {
   // Add event listener for clicking outside notification panel
   document.addEventListener("click", handleOutsideClick);
 
+  if (userStore.token && !userStore.user) {
+    await userStore.fetchUser();
+  }
+
   // Request notification permissions when the layout loads
   try {
     await requestPermissionAndGetToken();
@@ -117,9 +121,7 @@ function logout() {
   api
     .post("/api/logout")
     .then(() => {
-      userStore.user = null;
-      localStorage.removeItem("auth_token");
-      delete api.defaults.headers.common["Authorization"];
+      userStore.clearToken();
       router.push({ name: "Login" }).then(() => {
         window.location.reload();
       });

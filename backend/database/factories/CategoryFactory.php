@@ -14,10 +14,23 @@ class CategoryFactory extends Factory
      *
      * @return array<string, mixed>
      */
+
+    protected static $index = 0;
     public function definition(): array
     {
+        $categories = [
+            'Véhicules',
+            'Outils de bricolage',
+            'Matériel de camping',
+            'Électronique / Multimédia',
+            'Événementiel',
+            'Entretien / Nettoyage',
+            'Sports & Loisirs',
+            'test',
+        ];
+
         return [
-            'cat_title' => $this->faker->word(),
+            'cat_title' => $categories[self::$index++ % count($categories)],
         ];
     }
 }
