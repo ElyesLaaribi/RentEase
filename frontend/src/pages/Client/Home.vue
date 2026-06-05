@@ -2,7 +2,7 @@
 import { onMounted, ref, computed, watch, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
 import DefaultLayout from "../../components/DefaultLayout.vue";
-import api from "../../axios";
+import api, { storageUrl } from "../../axios";
 import CategoryBar from "../../components/CategoryBar.vue";
 import SearchForm from "../../components/SearchForm.vue";
 import PaginationComponent from "../../components/pagination.vue";
@@ -91,7 +91,7 @@ const fetchProducts = async (filters = {}, options = { skipPriceRangeUpdate: tru
       ...product,
       imageSrc:
         product.images && product.images.length
-          ? product.images[0]
+          ? storageUrl(product.images[0])
           : "/images/fallback-image.jpg",
     }));
 

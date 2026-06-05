@@ -2,7 +2,7 @@
 import { onMounted, ref, computed, watch, nextTick } from "vue";
 import { UserCircleIcon } from "@heroicons/vue/24/solid";
 import DefaultLayout from "../../components/DefaultLayout.vue";
-import api from "../../axios";
+import api, { storageUrl } from "../../axios";
 import { useRoute, useRouter } from "vue-router";
 import L from "leaflet";
 import { useUserStore } from "../../store/user";
@@ -291,11 +291,14 @@ const extractImages = (data) => {
 
   for (const prop of ImageArrays) {
     if (Array.isArray(data[prop]) && data[prop].length > 0) {
-      return data[prop].map((img, index) => ({
-        src:
-          typeof img === "object" ? img.url || img.src || img.path || img : img,
-        alt: `${data.Name || data.name || "Product"} image ${index + 1}`,
-      }));
+      return data[prop].map((img, index) => {
+        const rawSrc =
+          typeof img === "object" ? img.url || img.src || img.path || img : img;
+        return {
+          src: storageUrl(rawSrc),
+          alt: `${data.Name || data.name || "Product"} image ${index + 1}`,
+        };
+      });
     }
   }
 
@@ -305,7 +308,7 @@ const extractImages = (data) => {
     if (typeof data[prop] === "string" && data[prop]) {
       return [
         {
-          src: data[prop],
+          src: storageUrl(data[prop]),
           alt: `${data.Name || data.name || "Product"} image`,
         },
       ];
