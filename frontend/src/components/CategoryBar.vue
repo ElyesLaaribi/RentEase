@@ -13,7 +13,7 @@ const fetchCategories = async () => {
   isLoading.value = true;
   error.value = null;
   try {
-    const response = await api.get("http://127.0.0.1:8000/api/categories", {
+    const response = await api.get("/api/categories", {
       headers: {
         Accept: "application/json",
       },

@@ -10,7 +10,7 @@ import {
 import { ChevronUpDownIcon } from "@heroicons/vue/16/solid";
 import { CheckIcon, XMarkIcon, MapPinIcon } from "@heroicons/vue/20/solid";
 import SearchForm from "./SearchForm.vue";
-import api from "../axios";
+import api, { storagePathFromUrl, storageUrl } from "../axios";
 import { useToast } from "vue-toast-notification";
 import "vue-toast-notification/dist/theme-sugar.css";
 
@@ -246,9 +246,7 @@ const editListing = (item) => {
   if (item.longitude) lng.value = item.longitude;
 
   if (item.image_paths && item.image_paths.length > 0) {
-    existingImages.value = item.image_paths.map((path) =>
-      path.startsWith("http") ? path : `http://localhost:8000/storage/${path}`
-    );
+    existingImages.value = item.image_paths.map((path) => storageUrl(path));
 
     imagePreview.value = [...existingImages.value];
 
@@ -285,7 +283,7 @@ const submit = async () => {
     });
 
     imagesToRemove.value.forEach((img) => {
-      const relativePath = img.replace("http://localhost:8000/storage/", "");
+      const relativePath = storagePathFromUrl(img);
       formData.append("deleted_images[]", relativePath);
     });
 

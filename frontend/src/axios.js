@@ -3,11 +3,30 @@ import router from "./router.js";
 
 axios.defaults.withCredentials = true;
 
+export const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || "").replace(
+  /\/$/,
+  ""
+);
+
+export const storageUrl = (path) => {
+  if (!path) return "";
+  if (/^https?:\/\//i.test(path)) return path;
+
+  return `${apiBaseUrl}/storage/${String(path).replace(/^\/+/, "")}`;
+};
+
+export const storagePathFromUrl = (url) => {
+  if (!url || !apiBaseUrl) return url;
+
+  const storageBaseUrl = `${apiBaseUrl}/storage/`;
+  return url.startsWith(storageBaseUrl) ? url.slice(storageBaseUrl.length) : url;
+};
+
 const getStoredToken = () =>
   localStorage.getItem("auth_token") || sessionStorage.getItem("auth_token");
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: apiBaseUrl,
   headers: {
     'Accept': 'application/json',
     'Content-Type': 'application/json',
