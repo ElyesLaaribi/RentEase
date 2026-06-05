@@ -4,6 +4,8 @@ A comprehensive rental platform built with Laravel and Vue.js, enabling property
 
 ## Live Demo
 https://rentease-elyes.vercel.app/
+
+Lessor account : alex@gmail.com password : password123
 ## 🌟 Features
 
 ### For Clients
