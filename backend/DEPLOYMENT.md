@@ -62,13 +62,38 @@ use that URL as `APP_URL`.
 
 ## Render
 
-Create a new Docker web service from this repository with:
+The repository includes a root-level `render.yaml` Blueprint that creates:
+
+- A free Docker web service for `backend`
+- A free Render Postgres database
+
+Render's free Postgres database expires after 30 days, so this is suitable for
+testing and demos, not permanent production data.
+
+Create a new Blueprint from this repository, then fill in the prompted values:
+
+```env
+APP_KEY=base64:...
+APP_URL=https://your-backend-name.onrender.com
+FRONTEND_URL=https://your-vercel-frontend.vercel.app
+CORS_ALLOWED_ORIGINS=https://your-vercel-frontend.vercel.app
+SANCTUM_STATEFUL_DOMAINS=your-vercel-frontend.vercel.app
+```
+
+Or create a Docker web service manually with:
 
 - Dockerfile path: `backend/Dockerfile`
 - Docker context: `backend`
 
 The container listens on the `PORT` environment variable, which Render provides
 for web services.
+
+If you create the database manually on Render, use Render Postgres and set:
+
+```env
+DB_CONNECTION=pgsql
+DATABASE_URL=<Render internal database URL>
+```
 
 ## Vercel Frontend
 
