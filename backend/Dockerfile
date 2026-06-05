@@ -21,9 +21,7 @@ RUN apt-get update \
     && docker-php-ext-install \
         bcmath \
         curl \
-        dom \
         exif \
-        fileinfo \
         gd \
         intl \
         mbstring \
@@ -31,10 +29,6 @@ RUN apt-get update \
         pcntl \
         pdo_mysql \
         pdo_pgsql \
-        simplexml \
-        xml \
-        xmlreader \
-        xmlwriter \
         zip \
     && a2enmod headers rewrite \
     && apt-get clean \
