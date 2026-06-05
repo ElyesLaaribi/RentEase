@@ -10,9 +10,15 @@ export const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || "").replace(
 
 export const storageUrl = (path) => {
   if (!path) return "";
-  if (/^https?:\/\//i.test(path)) return path;
-
-  return `${apiBaseUrl}/storage/${String(path).replace(/^\/+/, "")}`;
+  let url = path;
+  if (!/^https?:\/\//i.test(path)) {
+    url = `${apiBaseUrl}/storage/${String(path).replace(/^\/+/, "")}`;
+  }
+  // Force HTTPS if the frontend is loaded securely to avoid Mixed Content errors
+  if (typeof window !== "undefined" && window.location.protocol === "https:") {
+    url = url.replace(/^http:/i, "https:");
+  }
+  return url;
 };
 
 export const storagePathFromUrl = (url) => {
