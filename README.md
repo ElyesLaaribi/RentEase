@@ -2,6 +2,8 @@
 
 A comprehensive rental platform built with Laravel and Vue.js, enabling property/item owners (lessors) to list their items for rent and clients to browse, book, and manage reservations.
 
+## Live Demo
+https://rent-ease-git-main-elyes-projects-4282f8dc.vercel.app/
 ## 🌟 Features
 
 ### For Clients
