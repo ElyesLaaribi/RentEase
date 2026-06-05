@@ -196,7 +196,9 @@ const formatDate = (dateString) => {
 
 const formatCurrency = (amount) => {
   if (amount === undefined || amount === null) return "TND 0";
-  return `TND ${amount.toFixed(2)}`;
+  const numericAmount = typeof amount === 'number' ? amount : parseFloat(amount);
+  if (isNaN(numericAmount)) return "TND 0";
+  return `TND ${numericAmount.toFixed(2)}`;
 };
 
 const selectedPaymentMethod = ref("card");
