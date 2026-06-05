@@ -1,5 +1,10 @@
 <?php
 
+$allowedOrigins = env(
+    'CORS_ALLOWED_ORIGINS',
+    'http://localhost:5173,http://127.0.0.1:5173'
+);
+
 return [
 
     /*
@@ -19,7 +24,10 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*'],
+    'allowed_origins' => array_values(array_filter(array_map(
+        'trim',
+        explode(',', $allowedOrigins)
+    ))),
 
     'allowed_origins_patterns' => [],
 
@@ -29,6 +37,9 @@ return [
 
     'max_age' => 0,
 
-    'supports_credentials' => true,
+    'supports_credentials' => filter_var(
+        env('CORS_SUPPORTS_CREDENTIALS', true),
+        FILTER_VALIDATE_BOOLEAN
+    ),
 
 ];

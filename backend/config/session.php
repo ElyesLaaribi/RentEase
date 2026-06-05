@@ -155,7 +155,7 @@ return [
     |
     */
 
-    'domain' => null,
+    'domain' => env('SESSION_DOMAIN'),
 
     /*
     |--------------------------------------------------------------------------
@@ -196,7 +196,7 @@ return [
     |
     */
 
-    'same_site' => 'lax',
+    'same_site' => env('SESSION_SAME_SITE', 'lax'),
 
     /*
     |--------------------------------------------------------------------------
@@ -209,6 +209,9 @@ return [
     |
     */
 
-    'partitioned' => false,
+    'partitioned' => filter_var(
+        env('SESSION_PARTITIONED_COOKIE', false),
+        FILTER_VALIDATE_BOOLEAN
+    ),
 
 ];
